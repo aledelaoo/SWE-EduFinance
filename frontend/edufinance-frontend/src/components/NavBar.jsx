@@ -1,4 +1,4 @@
-export default function NavBar({ email, onLogout }) {
+export default function NavBar({ userName, onLogout }) {
     return (
     <nav className="bg-blue-700 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

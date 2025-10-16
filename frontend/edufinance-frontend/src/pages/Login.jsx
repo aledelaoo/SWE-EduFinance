@@ -14,6 +14,16 @@ export default function Login({setIsAuthenticated}) {
             setError("Please fill in all fields");
             return;
         }
+
+        //Universal hard coded login information, change later
+        const universalEmail = "admin@edufinance.dev";
+        const universalPassword = "1234";
+
+        if (email == universalEmail && password == universalPassword) {
+            setIsAuthenticated(true);
+            navigate('/dashboard');
+        }
+
         if (!email.includes('@')) {
             setError("Please enter a valid email");
             return;

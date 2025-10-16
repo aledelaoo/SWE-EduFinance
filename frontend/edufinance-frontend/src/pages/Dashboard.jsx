@@ -55,7 +55,7 @@ export default function Dashboard({ setIsAuthenticated }) {
               <h3 className="text-gray-700 font-semibold text-sm uppercase tracking-wide">Spent</h3>
             </div>
             <p className="text-4xl font-bold text-orange-600">${budgetData.spent.toLocaleString()}</p>
-            <p className="text-sm text-gray-500 mt-2">{percentSpent}% used</p>
+            <p className="text-sm text-gray-500 mt-2">{percentageSpent}% used</p>
           </div>
 
           {/* Remaining Card */}
@@ -72,12 +72,12 @@ export default function Dashboard({ setIsAuthenticated }) {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-bold text-gray-800">Monthly Budget Progress</h3>
-            <span className="text-sm font-semibold text-gray-600">{percentSpent}% Used</span>
+            <span className="text-sm font-semibold text-gray-600">{percentageSpent}% Used</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-4">
             <div 
               className="bg-orange-500 h-4 rounded-full transition-all duration-500"
-              style={{ width: `${percentSpent}%` }}
+              style={{ width: `${percentageSpent}%` }}
             ></div>
           </div>
           <div className="flex justify-between mt-2 text-sm text-gray-600">
@@ -113,7 +113,7 @@ export default function Dashboard({ setIsAuthenticated }) {
                         <span className="text-xl font-bold text-gray-700">{transaction.category.charAt(0).toUpperCase()}</span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800">{transaction.name}</p>
+                        <p className="font-semibold text-gray-800">{transaction.Name}</p>
                         <p className="text-sm text-gray-500">{transaction.date}</p>
                       </div>
                     </div>
