@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Transactions from './pages/Transactions';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -17,6 +18,16 @@ export default function App() {
       />
       <Route
         path = "/" element = {<Navigate to = "/login" />}
+      />
+      <Route
+        path="/transactions"
+        element={
+          isAuthenticated ? (
+            <Transactions />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
       />
     </Routes>
   );
