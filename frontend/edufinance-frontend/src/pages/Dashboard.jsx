@@ -132,8 +132,41 @@ export default function Dashboard({ setIsAuthenticated }) {
                 <button className="text-blue-600 hover:text-blue-700 font-semibold">
                   Load More Transactions
                 </button>
-
-                {/*TODO: Left to implement: Alerts and Quick actions */}
+              </div>
+            </div>
+          </div>
+          {/* Alerts Section */}
+          <div className = "lg:col-span-1 space-y-6">
+            <div className = "bg-white rounded-lg shadow-md p-6">
+              <h3 className = "text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">Alerts</h3>
+              <div className = "space-y-3">
+                <div className = "bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                  <p className = "text-yellow-800 font-medium text-sm">High spending alert</p>
+                  <p className = "text-xs text-yellow-700 mt-1">You are 70% through your monthly budget</p>
+                </div>
+                <div className = "bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                  <p className = "text-blue-800 font-medium text-sm">Financial aid disbursement coming</p>
+                  <p className = "text-xs text-blue-700 mt-1">$1,200 disbursement in 5 days</p>
+                </div>
+                <div className = "bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                  <p className = "text-green-800 font-medium text-sm">Great job!</p>
+                  <p className = "text-xs text-green-700 mt-1">You saved $50 compared to last month</p>
+                </div>
+              </div>
+            </div>
+            {/* Actions Section */}
+            <div className = "bg-white rounded-lg shadow-md p-6">
+              <h3 className = "text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">Quick Actions</h3>
+              <div className = "space-y-3">
+                <button className = "w-full bg-blue-700 text-white py-3 rounded-md hover:bg-blue-800 transition font-bold">
+                  + Add Transaction
+                </button>
+                <button className = "w-full bg-gray-200 text-gray-800 py-3 rounded-md hover:bg-gray-300 transition font-semibold">
+                  View Full Report
+                </button>
+                <button className = "w-full bg-gray-200 text-gray-800 py-3 rounded-md hover:bg-gray-300 transition font-semibold">
+                  Adjust Budget
+                </button>
               </div>
             </div>
           </div>
