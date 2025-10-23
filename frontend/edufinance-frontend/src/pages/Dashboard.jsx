@@ -142,7 +142,7 @@ export default function Dashboard({ setIsAuthenticated }) {
               <div className = "space-y-3">
                 <div className = "bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                   <p className = "text-yellow-800 font-medium text-sm">High spending alert</p>
-                  <p className = "text-xs text-yellow-700 mt-1">You are 70% through your monthly budget</p>
+                  <p className = "text-xs text-yellow-700 mt-1">You are 80% through your monthly budget</p>
                 </div>
                 <div className = "bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
                   <p className = "text-blue-800 font-medium text-sm">Financial aid disbursement coming</p>
