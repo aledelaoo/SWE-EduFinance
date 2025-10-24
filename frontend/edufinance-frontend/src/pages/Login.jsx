@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import data from '../data/generatedDummy.json';
 
-export default function Login({setIsAuthenticated}) {
+export default function Login({setIsAuthenticated, setCurrentUserID}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -10,31 +11,49 @@ export default function Login({setIsAuthenticated}) {
     const handleLogin = (e) => {
         e.preventDefault();
         setError('');
+
         if (!email || !password) {
-            setError("Please fill in all fields");
+            setError('Please fill in all fields');
             return;
-        }
-
-        //Universal hard coded login information, change later
-        const universalEmail = "admin@edufinance.dev";
-        const universalPassword = "1234";
-
-        if (email == universalEmail && password == universalPassword) {
-            setIsAuthenticated(true);
-            navigate('/dashboard');
         }
 
         if (!email.includes('@')) {
-            setError("Please enter a valid email");
+            setError('Please enter a valid email');
             return;
         }
 
-        //TODO: Connect to backend for authentication
-        if (email && password) {
+        // 1) Try real (dummy) users from generated JSON
+        const user = data.users.find(
+            (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+        );
+
+        if (user) {
+            if (user.password === password) {
+            setCurrentUserID(user.id);
             setIsAuthenticated(true);
             navigate('/dashboard');
-    }
+            return;
+            } else {
+            setError('Invalid email or password');
+            return;
+            }
+        }
+
+        // Universal dev login
+        const universalEmail = 'admin@edufinance.dev';
+        const universalPassword = '1234';
+
+        if (email === universalEmail && password === universalPassword) {
+            const fallbackUser = data.users[0];
+            setCurrentUserID(fallbackUser?.id ?? null);
+            setIsAuthenticated(true);
+            navigate('/dashboard');
+            return;
+        }
+
+        setError('Invalid email or password');
 };
+
 return (
     <div className = "min-h-screen bg-gradient-to-br from-orange-500 to-blue-600 flex items-center justify-center p-4">
         <div className = "bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">

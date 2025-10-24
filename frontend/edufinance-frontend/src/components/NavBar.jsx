@@ -22,7 +22,7 @@ export default function NavBar({ userName, onLogout }) {
               >
                 Transactions
               </Link>
-              <Link
+              {/*<Link
                 to="/budget"
                 className="text-white hover:text-orange-400 font-medium transition"
               >
@@ -33,7 +33,7 @@ export default function NavBar({ userName, onLogout }) {
                 className="text-white hover:text-orange-400 font-medium transition"
               >
                 Reports
-              </Link>
+              </Link>*/}
             </div>
           </div>
 
