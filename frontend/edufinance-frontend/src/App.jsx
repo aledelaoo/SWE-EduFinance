@@ -6,15 +6,17 @@ import Transactions from './pages/Transactions';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [currentUserID, setCurrentUserID] = useState(null)
+
   return (
     <Routes>
       <Route 
         path = "/login" 
-        element = {isAuthenticated ? <Navigate to = "/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} />}
+        element = {isAuthenticated ? <Navigate to = "/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} setCurrentUserID={setCurrentUserID} />}
       />
       <Route
         path = "/dashboard"
-        element = {isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} /> : <Navigate to = "/login" />}
+        element = {isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} currentUserID={currentUserID}/> : <Navigate to = "/login" />}
       />
       <Route
         path = "/" element = {<Navigate to = "/login" />}
@@ -23,7 +25,7 @@ export default function App() {
         path="/transactions"
         element={
           isAuthenticated ? (
-            <Transactions />
+            <Transactions currentUserID={currentUserID}/>
           ) : (
             <Navigate to="/login" />
           )

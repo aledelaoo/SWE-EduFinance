@@ -1,25 +1,33 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-export default function Dashboard({ setIsAuthenticated }) {
+import data from '../data/generatedDummy.json';
+export default function Dashboard({ setIsAuthenticated, currentUserID }) {
   const navigate = useNavigate();
-  //TODO: when linking with backend
-  const [userName] = useState('Student User'); 
-  const [currentMonth] = useState('October 2025');
-  //TODO: budget data from the dummy data, placeholding for now
-  const [budgetData] = useState({totalBudget: 2400, monthlyBudget: 1200, spent: 420, remaining: 780});
-  //TODO: sample transactions here, replace later with dummy data
-  const [transactions] = useState([{id: 1, Name: 'Textbooks - Campus Store', date: 'Oct 8, 2025', amount: -120.00, category: 'books'}, 
-    {id: 2, Name: 'Financial Aid Disbursement', date: 'Oct 1, 2025', amount: 1200.00, category: 'income'}]);
   function handleLogout() {
     setIsAuthenticated(false);
     navigate('/login');
   }
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  // Look up the logged-in user (fallback so UI still renders)
+  const user = data.users.find(u => u.id === currentUserID) || data.users[0];
+
+  const userName = user.name;
+
+  const budgetData =
+    data.budgets.find(b => b.userId === user.id) ||
+    { totalBudget: 0, monthlyBudget: 0, spent: 0, remaining: 0, month: 'N/A' };
+
+  const currentMonth = budgetData.month;
+
+  const transactions = data.transactions.filter(t => t.userId === user.id);
+
   const percentageSpent = ((budgetData.spent / budgetData.monthlyBudget) * 100).toFixed(0);
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navigation Bar */}
-      <NavBar userName={userName} onLogout={handleLogout} />
+      <NavBar userName={userName} onLogout={handleLogout}/>
 
       {/* Main Dashboard Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -91,17 +99,15 @@ export default function Dashboard({ setIsAuthenticated }) {
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-800 border-b-2 border-gray-200 pb-2">Recent Transactions</h3>
-                <div className="flex space-x-2">
-                  <button className="text-sm text-gray-600 hover:text-gray-800 px-3 py-1 border border-gray-300 rounded">
-                    Filter
-                  </button>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-semibold">
-                    View All  
-                  </button>
-                </div>
+                <button
+                  className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+                  onClick={() => navigate('/transactions')}
+                >
+                  View All
+                </button>
               </div>
               <div className="space-y-1">
-                {transactions.map((transaction) => (
+                {transactions.slice(0, visibleCount).map((transaction) => (
                   <div 
                     key={transaction.id}
                     className="flex items-center justify-between py-4 border-b border-gray-100 hover:bg-gray-50 px-3 rounded transition"
@@ -113,7 +119,7 @@ export default function Dashboard({ setIsAuthenticated }) {
                         <span className="text-xl font-bold text-gray-700">{transaction.category.charAt(0).toUpperCase()}</span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800">{transaction.Name}</p>
+                        <p className="font-semibold text-gray-800">{transaction.name}</p>
                         <p className="text-sm text-gray-500">{transaction.date}</p>
                       </div>
                     </div>
@@ -126,13 +132,21 @@ export default function Dashboard({ setIsAuthenticated }) {
                     </div>
                   </div>
                 ))}
+                {transactions.length === 0 && (
+                  <div className="py-8 text-center text-gray-500">No transactions yet</div>
+                )}
               </div>
 
-              <div className="mt-6 text-center">
-                <button className="text-blue-600 hover:text-blue-700 font-semibold">
-                  Load More Transactions
-                </button>
-              </div>
+              {visibleCount < transactions.length && (
+                <div className="mt-6 text-center">
+                  <button
+                    className="text-blue-600 hover:text-blue-700 font-semibold"
+                    onClick={() => setVisibleCount((c) => c + 5)}
+                  >
+                    Load More Transactions
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           {/* Alerts Section */}
