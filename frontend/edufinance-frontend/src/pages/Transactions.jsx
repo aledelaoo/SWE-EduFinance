@@ -1,40 +1,60 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import data from '../data/generatedDummy.json';
+import { api } from "../api/api.js";
+import { auth } from "../auth";
 
-export default function Transactions({ currentUserID }) {
+export default function Transactions({ setIsAuthenticated, setCurrentUserID }) {
   const navigate = useNavigate();
-
-  // pull dummy data
-  const users = Array.isArray(data?.users) ? data.users : [];
-  const budgets = Array.isArray(data?.budgets) ? data.budgets : [];
-  const allTx = Array.isArray(data?.transactions) ? data.transactions : [];
-
-  const user = useMemo(
-    () => users.find(u => u.id === currentUserID) || users[0],
-    [users, currentUserID]
-  );
-  const userName = user?.name || 'User';
-  const month = budgets.find(b => b.userId === user.id)?.month || 'This Month';
-
-  const userTx = useMemo(
-    () => allTx.filter(t => t.userId === user.id),
-    [allTx, user?.id]
-  );
-
-  // filters
+  const [items, setItems] = useState([]);
+  const [summary, setSummary] = useState({ balance: 0, income: 0, expenses: 0 });
+  const [userName, setUserName] = useState('User');
+  const [month, setMonth] = useState('This Month');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      const [txRes, balRes] = await Promise.all([
+        api.get('/transactions'),
+        api.get('/balance')
+      ]);
+      
+      setItems(txRes.data || []);
+      setSummary(balRes.data || { balance: 0, income: 0, expenses: 0 });
+      setUserName(balRes.data?.userName || "User");
+      setMonth(balRes.data?.month || "This Month");
+      setError("");
+    } catch (e) {
+      console.error("Failed to load data:", e);
+      setError("Failed to load transactions. Please try logging in again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleLogout() {
+    auth.clear();
+    setIsAuthenticated(false);
+    setCurrentUserID(null);
+    navigate("/login");
+  }
+
   const categories = useMemo(() => {
-    const set = new Set(userTx.map(t => t.category).filter(Boolean));
+    const set = new Set(items.map(t => t.category).filter(Boolean));
     return ['all', ...Array.from(set)];
-  }, [userTx]);
+  }, [items]);
 
   const filteredTx = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return userTx.filter(t => {
+    return items.filter(t => {
       const matchText =
         !q ||
         t.name?.toLowerCase().includes(q) ||
@@ -42,19 +62,38 @@ export default function Transactions({ currentUserID }) {
       const matchCat = category === 'all' || t.category === category;
       return matchText && matchCat;
     });
-  }, [userTx, query, category]);
+  }, [items, query, category]);
+
+  async function onAddSample() {
+    try {
+      await api.post('/transactions', {
+        amount: -12.34,
+        category: "Transport",
+        name: "Test from UI",
+        date: new Date().toISOString().split('T')[0],
+        note: "sample"
+      });
+      await loadData();
+    } catch (e) {
+      console.error("Failed to add transaction:", e);
+      setError("Failed to add transaction (see console).");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <NavBar userName={userName} onLogout={() => navigate('/login')} />
+      <NavBar userName={userName} onLogout={handleLogout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">All Transactions</h1>
-          <p className="text-gray-600">Showing {userName}&rsquo;s transactions — {month}</p>
+          <p className="text-gray-600">Showing {userName}'s transactions — {month}</p>
+          <p className="text-gray-600">
+            Balance: <b>${summary.balance.toFixed(2)}</b> · Income: ${summary.income.toFixed(2)} · Expenses: ${summary.expenses.toFixed(2)}
+          </p>
+          {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <input
@@ -81,39 +120,48 @@ export default function Transactions({ currentUserID }) {
             >
               Reset
             </button>
+            <button 
+              onClick={onAddSample} 
+              className="ml-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Add Sample Tx
+            </button>
           </div>
         </div>
 
-        {/* List */}
         <div className="bg-white rounded-lg shadow-md">
-          <div className="divide-y">
-            {filteredTx.map((t) => (
-              <div key={t.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                <div className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 ${
-                    t.amount > 0 ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    <span className="font-bold text-gray-700">
-                      {t.category?.charAt(0)?.toUpperCase() || '?'}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-800">{t.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(t.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                      {' · '}{t.category}
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">Loading…</div>
+          ) : (
+            <div className="divide-y">
+              {filteredTx.map((t) => (
+                <div key={t.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
+                  <div className="flex items-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 ${
+                      t.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                      <span className="font-bold text-gray-700">
+                        {t.category?.charAt(0)?.toUpperCase() || '?'}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-800">{t.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(t.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                        {' · '}{t.category}
+                      </div>
                     </div>
                   </div>
+                  <div className={`font-bold ${t.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {t.amount > 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
+                  </div>
                 </div>
-                <div className={`font-bold ${t.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {t.amount > 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
-                </div>
-              </div>
-            ))}
-            {!filteredTx.length && (
-              <div className="p-8 text-center text-gray-500">No transactions match your filter.</div>
-            )}
-          </div>
+              ))}
+              {!filteredTx.length && (
+                <div className="p-8 text-center text-gray-500">No transactions match your filter.</div>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>

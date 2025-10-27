@@ -1,4 +1,13 @@
 import { Link } from 'react-router-dom';
+import { auth } from "../auth";
+
+function handleLogout() {
+  auth.clear();
+  setIsAuthenticated(false);
+  setCurrentUserID(null);
+  navigate("/login");
+}
+
 
 export default function NavBar({ userName, onLogout }) {
   return (
