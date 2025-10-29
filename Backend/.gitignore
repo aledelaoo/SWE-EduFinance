@@ -4,3 +4,11 @@ node_modules
 .env.*
 !.env.example
 /generated/prisma
+
+# Backend/.gitignore
+data/*.db
+data/*.db-journal
+*.db
+*.db-journal
+
+db.json

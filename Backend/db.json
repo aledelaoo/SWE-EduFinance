@@ -1,4 +1,17 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": 1,
+      "name": "Swe",
+      "email": "swe@ufl.edu",
+      "password": "sweswe"
+    },
+    {
+      "id": 2,
+      "name": "Schmitt taylor",
+      "email": "schmitt.taylor@ufl.edu",
+      "password": "sweFinance"
+    }
+  ],
   "transactions": []
 }
