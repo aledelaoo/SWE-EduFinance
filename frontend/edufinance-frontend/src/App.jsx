@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
+import Budget from './pages/Budget';
 import SignUp from './pages/SignUp.jsx'
 
 export default function App() {
@@ -35,6 +36,9 @@ export default function App() {
         path="/transactions"
         element={isAuthenticated ? <Transactions currentUserID={currentUserID}/> : <Navigate to="/login" />}
       />
+      <Route
+        path="/budget"
+        element={isAuthenticated ? <Budget setIsAuthenticated={setIsAuthenticated} /> : < Navigate to="/login" /> } />
       <Route path="/" element={<Navigate to="/login" />} />
     </Routes>
   )
