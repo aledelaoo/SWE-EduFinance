@@ -6,6 +6,8 @@ import { fileURLToPath } from "url";
 import path from "path";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 4000;
@@ -28,11 +30,31 @@ async function main() {
     // Initialize once at startup
     await db.read(); 
 
-    // Make sure arrays exist
-    db.data ||= { users: [], transactions: [] };
+  // Make sure arrays exist (preserve existing data but add missing collections)
+  db.data ||= {};
+  db.data.users ||= [];
+  db.data.transactions ||= [];
+  db.data.verificationTokens ||= [];
+  db.data.passwordResetTokens ||= [];
+  db.data.refreshTokens ||= [];
 
     // Middleware to require authentication
 function requireUser(req, res, next) {
+  // Try Authorization header (Bearer <token>) first
+  const hdr = req.headers.authorization ?? "";
+  const token = hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
+  if (token) {
+    try {
+      const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET || "dev_access_secret");
+      req.userId = (payload && payload.uid) ? Number((payload).uid) : null;
+      if (!req.userId) return res.status(401).json({ error: { message: "Unauthorized" } });
+      return next();
+    } catch (e) {
+      return res.status(401).json({ error: { message: "Unauthorized" } });
+    }
+  }
+
+  // Fallback to uid cookie (legacy/demo behavior)
   const uid = req.cookies?.uid;
   if (!uid) {
     return res.status(401).json({ error: { message: "Not logged in" } });
@@ -90,6 +112,7 @@ app.post("/auth/register", async (req, res) => {
       name: finalName,
       email: normalizedEmail,
       password: password, // storing plain passwords is very insecure for a real app!
+      isEmailVerified: true
     };
 
     //Insert new user into LowDB data
@@ -97,7 +120,14 @@ app.post("/auth/register", async (req, res) => {
 
     await db.write(); 
 
-    // Set cookie and return user info
+    // Create JWT access token (short-lived) and refresh token (long-lived)
+    const accessToken = jwt.sign({ uid: userId }, process.env.JWT_ACCESS_SECRET || "dev_access_secret", { expiresIn: process.env.ACCESS_TTL || "15m" });
+    const refreshToken = crypto.randomBytes(32).toString("hex");
+    const refreshExpiresAt = Date.now() + (Number(process.env.REFRESH_TTL_DAYS || 7) * 24 * 60 * 60 * 1000);
+    db.data.refreshTokens.push({ token: refreshToken, userId, expiresAt: refreshExpiresAt });
+    await db.write();
+
+    // Set cookie for legacy flows and return tokens
     res.cookie("uid", userId, { httpOnly: true, sameSite: "lax", secure: false });
 
     return res.status(201).json({
@@ -105,7 +135,9 @@ app.post("/auth/register", async (req, res) => {
       userId: userId,
       email: normalizedEmail,
       name: finalName,
-      accessToken: `devtoken-${userId}`
+      accessToken,
+      refreshToken,
+      refreshTokenExpiresAt: refreshExpiresAt
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -114,7 +146,7 @@ app.post("/auth/register", async (req, res) => {
 });
 
 // Login existing user
-app.post("/auth/login", (req, res) => {
+app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body || {};
   
   if (!email || !password) {
@@ -129,6 +161,18 @@ app.post("/auth/login", (req, res) => {
       return res.status(401).json({ error: { message: "Invalid credentials" } });
     }
 
+    // Respect email verification flag if present. If the flag is explicitly false, block login.
+    if (user.isEmailVerified === false) {
+      return res.status(403).json({ error: { message: "Email not verified" } });
+    }
+
+    // Create access and refresh tokens
+    const accessToken = jwt.sign({ uid: user.id }, process.env.JWT_ACCESS_SECRET || "dev_access_secret", { expiresIn: process.env.ACCESS_TTL || "15m" });
+    const refreshToken = crypto.randomBytes(32).toString("hex");
+    const refreshExpiresAt = Date.now() + (Number(process.env.REFRESH_TTL_DAYS || 7) * 24 * 60 * 60 * 1000);
+    db.data.refreshTokens.push({ token: refreshToken, userId: user.id, expiresAt: refreshExpiresAt });
+    await db.write();
+
     res.cookie("uid", user.id, { httpOnly: true, sameSite: "lax", secure: false });
 
     return res.json({
@@ -136,7 +180,9 @@ app.post("/auth/login", (req, res) => {
       userId: user.id,
       email: user.email,
       name: user.name,
-      accessToken: `devtoken-${user.id}`
+      accessToken,
+      refreshToken,
+      refreshTokenExpiresAt: refreshExpiresAt
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -144,10 +190,119 @@ app.post("/auth/login", (req, res) => {
   }
 });
 
+// Email verification removed temporarily: users are created verified by default.
+
+// Request password reset (creates a token and returns it for demo/testing)
+app.post("/auth/request-password-reset", async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: { message: "Missing email" } });
+
+  try {
+    const normalizedEmail = String(email).toLowerCase();
+    const user = db.data.users.find(u => u.email === normalizedEmail);
+    if (!user) return res.status(200).json({ ok: true }); // don't reveal existence
+
+    const token = crypto.randomBytes(24).toString("hex");
+    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+    db.data.passwordResetTokens.push({ token, userId: user.id, expiresAt });
+    await db.write();
+
+    // For demo we return token in response. In real app you'd email this.
+    return res.json({ ok: true, resetToken: token, resetTokenExpiresAt: expiresAt });
+  } catch (err) {
+    console.error("Request password reset error:", err);
+    return res.status(500).json({ error: { message: "Server error" } });
+  }
+});
+
+// Reset password using token
+app.post("/auth/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (!token || !newPassword) return res.status(400).json({ error: { message: "Missing token or newPassword" } });
+
+  try {
+    const idx = db.data.passwordResetTokens.findIndex(t => t.token === token);
+    if (idx === -1) return res.status(400).json({ error: { message: "Invalid or expired token" } });
+    const tok = db.data.passwordResetTokens[idx];
+    if (tok.expiresAt < Date.now()) {
+      db.data.passwordResetTokens.splice(idx, 1);
+      await db.write();
+      return res.status(400).json({ error: { message: "Invalid or expired token" } });
+    }
+
+    const user = db.data.users.find(u => u.id === tok.userId);
+    if (!user) return res.status(400).json({ error: { message: "Invalid token" } });
+
+    // Update password (plain text for demo)
+    user.password = newPassword;
+
+    // Remove token
+    db.data.passwordResetTokens.splice(idx, 1);
+    await db.write();
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ error: { message: "Server error" } });
+  }
+});
+
+// Refresh access token using refresh token
+app.post("/auth/refresh", async (req, res) => {
+  const { refreshToken } = req.body || {};
+  if (!refreshToken) return res.status(400).json({ error: { message: "Missing refreshToken" } });
+
+  try {
+    const idx = db.data.refreshTokens.findIndex(rt => rt.token === refreshToken);
+    if (idx === -1) return res.status(401).json({ error: { message: "Invalid refresh token" } });
+    const rt = db.data.refreshTokens[idx];
+    if (rt.expiresAt < Date.now()) {
+      db.data.refreshTokens.splice(idx, 1);
+      await db.write();
+      return res.status(401).json({ error: { message: "Invalid refresh token" } });
+    }
+
+    // Issue new access token and rotate refresh token
+    const userId = rt.userId;
+    const accessToken = jwt.sign({ uid: userId }, process.env.JWT_ACCESS_SECRET || "dev_access_secret", { expiresIn: process.env.ACCESS_TTL || "15m" });
+    // rotate
+    db.data.refreshTokens.splice(idx, 1);
+    const newRefreshToken = crypto.randomBytes(32).toString("hex");
+    const newRefreshExpiresAt = Date.now() + (Number(process.env.REFRESH_TTL_DAYS || 7) * 24 * 60 * 60 * 1000);
+    db.data.refreshTokens.push({ token: newRefreshToken, userId, expiresAt: newRefreshExpiresAt });
+    await db.write();
+
+    return res.json({ ok: true, accessToken, refreshToken: newRefreshToken, refreshTokenExpiresAt: newRefreshExpiresAt });
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    return res.status(500).json({ error: { message: "Server error" } });
+  }
+});
+
 // Logout
-app.post("/auth/logout", (_req, res) => {
-  res.clearCookie("uid");
-  res.json({ ok: true });
+app.post("/auth/logout", (req, res) => {
+  try {
+    const uid = req.cookies?.uid;
+    const { refreshToken } = req.body || {};
+
+    // If user id cookie present, revoke all refresh tokens for user
+    if (uid) {
+      const userId = Number(uid);
+      db.data.refreshTokens = db.data.refreshTokens.filter(rt => rt.userId !== userId);
+    }
+
+    // If refreshToken provided, remove that single token
+    if (refreshToken) {
+      db.data.refreshTokens = db.data.refreshTokens.filter(rt => rt.token !== refreshToken);
+    }
+
+    db.write().catch(() => {});
+    res.clearCookie("uid");
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Logout error:", err);
+    return res.status(500).json({ error: { message: "Server error" } });
+  }
 });
 
 // ========== TRANSACTION ROUTES ==========
@@ -201,9 +356,9 @@ app.post("/transactions", requireUser, async(req, res) => {
     //Insert new transaction into LowDB data
     db.data.transactions.push(newTransaction);
 
-    await db.write();
+  await db.write();
     
-    return res.status(201).json(transaction);
+  return res.status(201).json(newTransaction);
   } catch (error) {
     console.error("Create transaction error:", error);
     return res.status(500).json({ error: { message: "Server error" } });

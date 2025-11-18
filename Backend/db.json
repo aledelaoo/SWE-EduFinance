@@ -11,7 +11,22 @@
       "name": "Schmitt taylor",
       "email": "schmitt.taylor@ufl.edu",
       "password": "sweFinance"
+    },
+    {
+      "id": 3,
+      "name": "Me",
+      "email": "me@ufl.edu",
+      "password": "gogators",
+      "isEmailVerified": false
     }
   ],
-  "transactions": []
+  "transactions": [],
+  "verificationTokens": [
+    {
+      "token": "55c46a58d4b6ac01d471e689c2876c6101b211ce77d323a6",
+      "userId": 3,
+      "expiresAt": 1763477300326
+    }
+  ],
+  "passwordResetTokens": []
 }
