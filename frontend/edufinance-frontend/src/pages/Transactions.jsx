@@ -1,48 +1,66 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import data from '../data/generatedDummy.json';
+import api from '../api/api';
 
 export default function Transactions({ currentUserID }) {
   const navigate = useNavigate();
 
-  // pull dummy data
-  const users = Array.isArray(data?.users) ? data.users : [];
-  const budgets = Array.isArray(data?.budgets) ? data.budgets : [];
-  const allTx = Array.isArray(data?.transactions) ? data.transactions : [];
+  // remote data
+  const [allTx, setAllTx] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const user = useMemo(
-    () => users.find(u => u.id === currentUserID) || users[0],
-    [users, currentUserID]
-  );
-  const userName = user?.name || 'User';
-  const month = budgets.find(b => b.userId === user.id)?.month || 'This Month';
-
-  const userTx = useMemo(
-    () => allTx.filter(t => t.userId === user.id),
-    [allTx, user?.id]
-  );
-
+  // keep a simple user/title fallback — backend may return only the current user's txs
+  const userName = 'User';
+  const month = 'This Month';
   // filters
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
 
+  // load transactions from backend when query/category change
+  useEffect(() => {
+    let cancelled = false;
+    const fetchTx = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = {};
+        if (query && query.trim()) params.q = query.trim();
+        if (category && category !== 'all') params.category = category;
+
+        const res = await api.get('/transactions', { params });
+        if (!cancelled) setAllTx(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        if (!cancelled) setError(err?.response?.data || err.message || 'Failed to load');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    // debounce the request slightly to avoid spamming while the user types
+    const t = setTimeout(fetchTx, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [query, category]);
+
+
   const categories = useMemo(() => {
-    const set = new Set(userTx.map(t => t.category).filter(Boolean));
+    const set = new Set(allTx.map(t => t.category).filter(Boolean));
     return ['all', ...Array.from(set)];
-  }, [userTx]);
+  }, [allTx]);
 
   const filteredTx = useMemo(() => {
+    // server-side search/filter applied, but keep a client-side safety filter
     const q = query.trim().toLowerCase();
-    return userTx.filter(t => {
-      const matchText =
-        !q ||
-        t.name?.toLowerCase().includes(q) ||
-        t.category?.toLowerCase().includes(q);
+    return allTx.filter(t => {
+      const matchText = !q || t.name?.toLowerCase().includes(q) || t.category?.toLowerCase().includes(q);
       const matchCat = category === 'all' || t.category === category;
       return matchText && matchCat;
     });
-  }, [userTx, query, category]);
+  }, [allTx, query, category]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -51,7 +69,7 @@ export default function Transactions({ currentUserID }) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">All Transactions</h1>
-          <p className="text-gray-600">Showing {userName}&rsquo;s transactions — {month}</p>
+          <p className="text-gray-600">Showing transactions{allTx.length ? ` — ${allTx.length} results` : ''}</p>
         </div>
 
         {/* Filters */}
@@ -87,6 +105,12 @@ export default function Transactions({ currentUserID }) {
         {/* List */}
         <div className="bg-white rounded-lg shadow-md">
           <div className="divide-y">
+            {loading && (
+              <div className="p-8 text-center text-gray-500">Loading transactions…</div>
+            )}
+            {error && (
+              <div className="p-8 text-center text-red-500">{typeof error === 'string' ? error : JSON.stringify(error)}</div>
+            )}
             {filteredTx.map((t) => (
               <div key={t.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
                 <div className="flex items-center">

@@ -310,19 +310,34 @@ app.post("/auth/logout", (req, res) => {
 // Get all transactions for logged-in user
 app.get("/transactions", requireUser, (req, res) => {
   try {
-    const transactions = db.data.transactions
-      .filter(t => t.user_id === req.userId)
-      .sort((a, b) => {
-        //date (most recent first)
-        if (a.date < b.date) return 1;
-        if (a.date > b.date) return -1;
-        //ID (highest ID first for items with same date)
-        if (a.id < b.id) return 1;
-        if (a.id > b.id) return -1;
-        return 0;
+    // Server-side filtering support: q (search query), category (category name or 'all')
+    const q = (req.query.q || "").toString().trim().toLowerCase();
+    const category = (req.query.category || "all").toString().toLowerCase();
+
+    let tx = db.data.transactions.filter(t => t.user_id === req.userId);
+
+    if (category && category !== "all") {
+      tx = tx.filter(t => (t.category || "").toString().toLowerCase() === category);
+    }
+
+    if (q) {
+      tx = tx.filter(t => {
+        const name = (t.name || "").toString().toLowerCase();
+        const cat = (t.category || "").toString().toLowerCase();
+        const note = (t.note || "").toString().toLowerCase();
+        return name.includes(q) || cat.includes(q) || note.includes(q);
       });
-    
-    return res.json(transactions);
+    }
+
+    tx = tx.sort((a, b) => {
+      if (a.date < b.date) return 1;
+      if (a.date > b.date) return -1;
+      if (a.id < b.id) return 1;
+      if (a.id > b.id) return -1;
+      return 0;
+    });
+
+    return res.json(tx);
   } catch (error) {
     console.error("Get transactions error:", error);
     return res.status(500).json({ error: { message: "Server error" } });
