@@ -91,7 +91,6 @@ function monthLabelsBetween(startDate, endDate) {
   }
   return labels;
 }
-
 // normalize a date to canonical month id (YYYY-MM) format for budget operations
 function monthIdFromDateInput(input) {
   const d = (input instanceof Date) ? input : new Date(input);
@@ -100,7 +99,6 @@ function monthIdFromDateInput(input) {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   return `${y}-${m}`; // e.g. 2025-09
 }
-
 // generate array of month ids (YYYY-MM) spanning from start to end date
 function monthIdsBetween(startDate, endDate) {
   const ids = [];
@@ -112,7 +110,6 @@ function monthIdsBetween(startDate, endDate) {
   }
   return ids;
 }
-
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -406,7 +403,6 @@ app.put("/settings/semester", requireUser, async (req, res) => {
     return res.status(500).json({ error: { message: "Server error" } });
   }
 });
-
 // Need to provide semester info to frontend for S1 workflows (months and totalMonths).
 // Need to include canonical month ids (YYYY-MM) or a semester id so frontend can request per-month budgets.
 // get semester dates for logged-in user
@@ -419,14 +415,12 @@ app.get("/settings/semester", requireUser, (req, res) => {
         error: { message: "Semester dates not set" },
       });
     }
-
     return res.json({ ok: true, semester: sem });
   } catch (error) {
     console.error("Get semester error:", error);
     return res.status(500).json({ error: { message: "Server error" } });
   }
 });
-
 // Need to implement BUDGET ROUTES (S1 support).
 // Need to expose per-month budget CRUD so frontend can persist and display semester-distributed budgets.
 // Need to secure and validate payloads and consider pagination if many months exist.
@@ -444,18 +438,15 @@ app.get('/budgets', requireUser, (req, res) => {
     return res.status(500).json({ error: { message: 'Server error' } });
   }
 });
-
 // Initialize per-month budgets from a semester (creates budgets for each month in semester)
 // Body: { semesterId?: number, startDate?: 'YYYY-MM-DD', endDate?: 'YYYY-MM-DD', template?: { totalBudget?: number, categories?: [{ name, allocated }] } }
 app.post('/budgets/init-from-semester', requireUser, async (req, res) => {
   try {
     const { semesterId, startDate, endDate, template } = req.body || {};
-
   // Validate the template shape: `template.totalBudget` should be numeric and
   // `template.categories` (if present) must be an array of { name, allocated }.
   // Document and enforce the chosen distribution rules (even split vs proportional)
   // so frontend and backend produce consistent budgets.
-
     let sem = null;
     if (semesterId) {
       sem = db.data.semesters.find(s => s.id === Number(semesterId) && s.user_id === req.userId);
@@ -468,12 +459,10 @@ app.post('/budgets/init-from-semester', requireUser, async (req, res) => {
     } else {
       return res.status(400).json({ error: { message: 'Provide semesterId or startDate and endDate' } });
     }
-
     // compute canonical month ids between sem.startDate and sem.endDate
     const start = new Date(sem.startDate);
     const end = new Date(sem.endDate);
     const monthIds = monthIdsBetween(start, end);
-
   // Build budgets for each month. If `template.categories` is provided, copy that
   // allocation to each month. When splitting a totalBudget across months, handle
   // rounding carefully (keep cents consistent and adjust the final month if needed)
@@ -486,7 +475,6 @@ app.post('/budgets/init-from-semester', requireUser, async (req, res) => {
         created.push(exists);
         continue;
       }
-
       // Need to validate and sanitize category names/allocations before storing.
       const budget = {
         id: nextId(db.data.budgets),
@@ -497,11 +485,9 @@ app.post('/budgets/init-from-semester', requireUser, async (req, res) => {
         categories: template?.categories ? template.categories.map(c => ({ name: c.name, allocated: Number(c.allocated) })) : [],
         createdAt: new Date().toISOString()
       };
-
       db.data.budgets.push(budget);
       created.push(budget);
     }
-
     await db.write();
     return res.status(201).json({ ok: true, created });
   } catch (err) {
@@ -509,7 +495,6 @@ app.post('/budgets/init-from-semester', requireUser, async (req, res) => {
     return res.status(500).json({ error: { message: 'Server error' } });
   }
 });
-
 // Update a budget by id
 app.put('/budgets/:id', requireUser, async (req, res) => {
   try {
@@ -520,12 +505,10 @@ app.put('/budgets/:id', requireUser, async (req, res) => {
     const body = req.body || {};
     const idx = db.data.budgets.findIndex(b => b.id === id && b.user_id === req.userId);
     if (idx === -1) return res.status(404).json({ error: { message: 'Budget not found' } });
-
     const bud = db.data.budgets[idx];
     if (typeof body.totalBudget === 'number') bud.totalBudget = body.totalBudget;
     if (Array.isArray(body.categories)) bud.categories = body.categories.map(c => ({ name: c.name, allocated: Number(c.allocated) }));
     bud.updatedAt = new Date().toISOString();
-
     await db.write();
     return res.json(bud);
   } catch (err) {
@@ -553,17 +536,13 @@ app.get("/bills", requireUser, (req, res) => {
     let paidFilter = null;
     if (paidParam === "true") paidFilter = true;
     else if (paidParam === "false") paidFilter = false;
-
     let userBills = db.data.bills.filter(b => b.user_id === req.userId);
-
     if (category) {
       userBills = userBills.filter(b => (b.category || "").toString().toLowerCase() === category);
     }
-
     if (paidFilter !== null) {
       userBills = userBills.filter(b => b.paid === paidFilter);
     }
-
     // Sort by dueDate ascending (nearest due date first)
     userBills.sort((a, b) => {
       if (a.dueDate < b.dueDate) return -1;
@@ -572,19 +551,16 @@ app.get("/bills", requireUser, (req, res) => {
       if (a.id > b.id) return 1;
       return 0;
     });
-
     return res.json(userBills);
   } catch (err) {
     console.error("Get bills error:", err);
     return res.status(500).json({ error: { message: "Server error" } });
   }
 });
-
 // Create a new bill for the logged-in user with validation for required fields and amounts
 // All dates are normalized to YYYY-MM-DD format for timezone safety
 app.post("/bills", requireUser, async (req, res) => {
   const { name, amount, dueDate, category, note } = req.body || {};
-
   if (!name || typeof amount !== "number" || !dueDate) {
     return res.status(400).json({
       error: { message: "name, amount (number), and dueDate are required" },
@@ -617,7 +593,6 @@ app.post("/bills", requireUser, async (req, res) => {
     };
     db.data.bills.push(newBill);
     await db.write();
-
     return res.status(201).json(newBill);
   } catch (err) {
     console.error("Create bill error:", err);
