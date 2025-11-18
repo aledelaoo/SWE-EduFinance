@@ -20,7 +20,7 @@ const __dirname = path.dirname(__filename);
 const file = path.resolve(__dirname, "db.json");
 
 // Set up LowDB
-const adapter = new JSONFile(file);
+const adapter = new JSONFile(file); //use JSON file for storage
 const db = new Low(adapter, { users: [], transactions: [] });
 
 
@@ -344,7 +344,7 @@ app.get("/transactions", requireUser, (req, res) => {
   }
 });
 
-// Create new transaction
+//create a new transaction
 app.post("/transactions", requireUser, async(req, res) => {
   const { amount, category, name, date, note } = req.body || {};
   
@@ -380,7 +380,7 @@ app.post("/transactions", requireUser, async(req, res) => {
   }
 });
 
-// Delete transaction
+//delete a transaction
 app.delete("/transactions/:id", requireUser, async(req, res) => {
   const txId = Number(req.params.id);
   
@@ -402,6 +402,37 @@ app.delete("/transactions/:id", requireUser, async(req, res) => {
 });
 
 //balance route
+
+//overspending alert route
+app.get("/alerts/overspend", requireUser, (req, res) => {
+  try {
+    //getting current month label
+    const monthLabel = nowMonthLabel();
+    //getting user's transactions for current month
+    const transactions = db.data.transactions.filter(t => t.user_id === req.userId && t.date && new Date(t.date).toLocaleString("en-US", { month: "long", year: "numeric" }) === monthLabel);
+
+    const income = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    const expensesAbs = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    //overspend logic: expenses > income
+    let overspend = expensesAbs > income;
+    let alertMsg = null;
+    if (overspend) {
+      alertMsg = `Overspending detected: expenses ($${expensesAbs.toFixed(2)}) exceed income ($${income.toFixed(2)}) for ${monthLabel}.`;
+    }
+
+    return res.json({
+      month: monthLabel,
+      income,
+      expenses: expensesAbs,
+      overspend,
+      alert: alertMsg
+    });
+  } catch (error) {
+    console.error("Overspend alert error:", error);
+    return res.status(500).json({ error: { message: "Server error" } });
+  }
+});
 
 app.get("/balance", requireUser, (req, res) => {
   try {
