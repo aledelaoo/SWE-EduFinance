@@ -28,5 +28,61 @@
       "expiresAt": 1763477300326
     }
   ],
-  "passwordResetTokens": []
+  "passwordResetTokens": [],
+  "refreshTokens": [
+    {
+      "token": "ae1cef94bb432966d999039a9555e99bc938207fd7e4a93ea7de5247da0fe00a",
+      "userId": 1,
+      "expiresAt": 1764266713370
+    },
+    {
+      "token": "11914b0a8f5ac55d67f89cc86804db5ee70b248a6069b3005259fb9e134407c1",
+      "userId": 1,
+      "expiresAt": 1764267122375
+    },
+    {
+      "token": "525370a16f54e332e962e1107a38381bf4e87c484b3957f31240d5afb084b707",
+      "userId": 1,
+      "expiresAt": 1764267377709
+    },
+    {
+      "token": "018fc873e97dfc3624161470eb3e9c056c1190ed7e0a510c0535532de945fc76",
+      "userId": 1,
+      "expiresAt": 1764267596907
+    },
+    {
+      "token": "e2fc78760959fa42889e85054a26d714be1a8752a7e41ae724aa3730045a20bf",
+      "userId": 1,
+      "expiresAt": 1764267825260
+    },
+    {
+      "token": "403fc506aed74da803154ec1e09379678d7f58e70630fc9f3a51e67ed14eda9c",
+      "userId": 1,
+      "expiresAt": 1764268000091
+    },
+    {
+      "token": "7b0000af3e049c982142c5a5c560b92052e4a074a096f411369f886a9e19f8d8",
+      "userId": 1,
+      "expiresAt": 1764268212840
+    },
+    {
+      "token": "3997082d3bda40b4fa8536d757b766d7fbcf2c923d50370acba7667344f0d4e8",
+      "userId": 1,
+      "expiresAt": 1764523212406
+    },
+    {
+      "token": "ca09212e379f69c3c536c5362e1ac3aaaf5aa3989202225a895e1dec443848d4",
+      "userId": 1,
+      "expiresAt": 1764523553700
+    },
+    {
+      "token": "c859e57c5bcff517b0a0298592cf6c5966a9efc28073a83088d7af1b4081cdd0",
+      "userId": 1,
+      "expiresAt": 1764623096539
+    }
+  ],
+  "semesters": [],
+  "budgets": [],
+  "bills": [],
+  "notificationPreferences": []
 }
