@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budget from './pages/Budget';
 import SignUp from './pages/SignUp.jsx'
+import Report from './pages/Report.jsx';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -40,6 +41,10 @@ export default function App() {
         path="/budget"
         element={isAuthenticated ? <Budget setIsAuthenticated={setIsAuthenticated} /> : < Navigate to="/login" /> } />
       <Route path="/" element={<Navigate to="/login" />} />
+      <Route
+        path="/report"
+        element={isAuthenticated ? <Report setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/login" />}
+      />
     </Routes>
   )
 }

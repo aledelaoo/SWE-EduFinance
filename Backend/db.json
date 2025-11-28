@@ -28,12 +28,5 @@
       "expiresAt": 1763477300326
     }
   ],
-  "passwordResetTokens": [],
-  "refreshTokens": [
-    {
-      "token": "46a3466a19d44e0123d00360cabb5cc78b0d5e42b39c7d823320cdf95e083ea7",
-      "userId": 2,
-      "expiresAt": 1764973584206
-    }
-  ]
+  "passwordResetTokens": []
 }
