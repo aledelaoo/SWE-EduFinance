@@ -69,7 +69,7 @@ export default function Report({ setIsAuthenticated }) {
     navigate('/login');
   }
 
-  function generatePdf() {
+  async function generatePdf() {
     const doc = new jsPDF();
     const months = TERM_MONTHS[selectedTerm];
     const { monthlyBudget, currentMonth } = budgetData;
@@ -84,7 +84,7 @@ export default function Report({ setIsAuthenticated }) {
     doc.text(`Based on: ${currentMonth}`, 14, 38);
     doc.text(`Monthly budget: $${monthlyBudget.toFixed(2)}`, 14, 44);
 
-    // Table body
+    //Table body for budget
     const rows = [];
     months.forEach((month, i) => {
       categories.forEach(c => {
@@ -106,6 +106,50 @@ export default function Report({ setIsAuthenticated }) {
       head: [['Month', 'Category', 'Allocated', 'Spent', 'Remaining']],
       body: rows,
     });
+
+    //attempting to fetch transactions and append a transactions report
+    try {
+      const res = await api.get('/transactions');
+      const txs = Array.isArray(res.data) ? res.data : [];
+
+      //Filter transactions to the selected term months and year from currentMonth
+      let baseYear = new Date(currentMonth).getFullYear();
+      if (!baseYear || Number.isNaN(baseYear)) baseYear = new Date().getFullYear();
+
+      const txForTerm = txs.filter(t => {
+        try {
+          const d = new Date(t.date);
+          const monthName = d.toLocaleString('en-US', { month: 'long' });
+          const year = d.getFullYear();
+          return months.includes(monthName) && year === baseYear;
+        } catch (e) {
+          return false;
+        }
+      });
+
+      //Add heading for transactions
+      const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 54 + rows.length * 6 + 20;
+      doc.setFontSize(14);
+      doc.text('Transactions Report', 14, startY);
+
+      const txRows = txForTerm.map(t => [
+        new Date(t.date).toLocaleDateString(),
+        t.name || '',
+        t.category || '',
+        t.note || '',
+        (t.amount >= 0 ? '+' : '-') + `$${Math.abs(t.amount).toFixed(2)}`
+      ]);
+
+      autoTable(doc, {
+        startY: startY + 6,
+        head: [['Date', 'Name', 'Category', 'Note', 'Amount']],
+        body: txRows,
+        styles: { fontSize: 9 }
+      });
+    } catch (err) {
+      //if transactions can't be loaded, silently continue (still log for debugging)
+      console.warn('Failed to fetch transactions for report:', err);
+    }
 
     doc.save(`budget_${selectedTerm}.pdf`);
   }

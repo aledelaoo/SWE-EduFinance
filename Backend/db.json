@@ -18,9 +18,292 @@
       "email": "me@ufl.edu",
       "password": "gogators",
       "isEmailVerified": false
+    },
+    {
+      "id": 4,
+      "name": "Alex Rivera",
+      "email": "alex.rivera@student.edu",
+      "password": "alex123"
+    },
+    {
+      "id": 5,
+      "name": "Jamie Nguyen",
+      "email": "jamie.nguyen@student.edu",
+      "password": "jamie123"
     }
   ],
-  "transactions": [],
+  "transactions": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "name": "Scholarship Deposit",
+      "date": "2025-09-01",
+      "amount": 500,
+      "category": "Scholarship",
+      "note": "Departmental scholarship"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "name": "Campus Job Pay",
+      "date": "2025-10-15",
+      "amount": 220,
+      "category": "Income",
+      "note": "Part-time campus job"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "name": "Parent Transfer",
+      "date": "2025-11-02",
+      "amount": 100,
+      "category": "Gift",
+      "note": "Money from parents"
+    },
+    {
+      "id": 4,
+      "user_id": 1,
+      "name": "Grocery Store",
+      "date": "2025-11-03",
+      "amount": -42.3,
+      "category": "Food",
+      "note": "Groceries"
+    },
+    {
+      "id": 5,
+      "user_id": 1,
+      "name": "Coffee",
+      "date": "2025-11-04",
+      "amount": -4.5,
+      "category": "Food",
+      "note": "Coffee and snack"
+    },
+    {
+      "id": 6,
+      "user_id": 1,
+      "name": "Textbook Purchase",
+      "date": "2025-10-15",
+      "amount": -68.99,
+      "category": "Books",
+      "note": "Used textbook for class"
+    },
+    {
+      "id": 14,
+      "user_id": 1,
+      "name": "Parent Deposit",
+      "date": "2025-11-15",
+      "amount": 60,
+      "category": "Gift",
+      "note": "Small support from parents"
+    },
+    {
+      "id": 15,
+      "user_id": 1,
+      "name": "Laundry",
+      "date": "2025-11-10",
+      "amount": -8.5,
+      "category": "Services",
+      "note": "Campus laundry"
+    },
+    {
+      "id": 16,
+      "user_id": 1,
+      "name": "Ride Share",
+      "date": "2025-11-12",
+      "amount": -12,
+      "category": "Transportation",
+      "note": "Ride to library"
+    },
+    {
+      "id": 7,
+      "user_id": 2,
+      "name": "Scholarship Deposit",
+      "date": "2025-08-28",
+      "amount": 750,
+      "category": "Scholarship",
+      "note": "External scholarship"
+    },
+    {
+      "id": 8,
+      "user_id": 2,
+      "name": "Grandparent Deposit",
+      "date": "2025-09-10",
+      "amount": 50,
+      "category": "Gift",
+      "note": "Small help from grandparent"
+    },
+    {
+      "id": 9,
+      "user_id": 2,
+      "name": "Campus Meal Plan",
+      "date": "2025-11-05",
+      "amount": -35,
+      "category": "Food",
+      "note": "Meal swipes and dining"
+    },
+    {
+      "id": 10,
+      "user_id": 2,
+      "name": "Part-time Pay",
+      "date": "2025-11-07",
+      "amount": 180,
+      "category": "Income",
+      "note": "Weekend shift at cafe"
+    },
+    {
+      "id": 11,
+      "user_id": 2,
+      "name": "Bus Pass",
+      "date": "2025-11-01",
+      "amount": -25,
+      "category": "Transportation",
+      "note": "Monthly bus pass"
+    },
+    {
+      "id": 12,
+      "user_id": 2,
+      "name": "Stationery",
+      "date": "2025-09-25",
+      "amount": -18.2,
+      "category": "Supplies",
+      "note": "Notebooks and pens"
+    },
+    {
+      "id": 13,
+      "user_id": 2,
+      "name": "Textbooks",
+      "date": "2025-11-28",
+      "amount": -400,
+      "category": "Textbooks",
+      "note": null
+    },
+    {
+      "id": 17,
+      "user_id": 2,
+      "name": "Tutor Payment",
+      "date": "2025-10-20",
+      "amount": -30,
+      "category": "Education",
+      "note": "Weekly tutoring"
+    },
+    {
+      "id": 18,
+      "user_id": 2,
+      "name": "Refund",
+      "date": "2025-11-06",
+      "amount": 20,
+      "category": "Income",
+      "note": "Returned overcharge"
+    },
+    {
+      "id": 19,
+      "user_id": 2,
+      "name": "Gig Pay",
+      "date": "2025-11-20",
+      "amount": 50,
+      "category": "Income",
+      "note": "One-off gig"
+    },
+    {
+      "id": 20,
+      "user_id": 3,
+      "name": "Campus Job Pay",
+      "date": "2025-11-01",
+      "amount": 150,
+      "category": "Income",
+      "note": "Library shift"
+    },
+    {
+      "id": 21,
+      "user_id": 3,
+      "name": "Books",
+      "date": "2025-11-02",
+      "amount": -45,
+      "category": "Books",
+      "note": "Used textbook"
+    },
+    {
+      "id": 22,
+      "user_id": 3,
+      "name": "Parent Transfer",
+      "date": "2025-11-05",
+      "amount": 75,
+      "category": "Gift",
+      "note": "Support from family"
+    },
+    {
+      "id": 23,
+      "user_id": 3,
+      "name": "Coffee",
+      "date": "2025-11-06",
+      "amount": -3.5,
+      "category": "Food",
+      "note": "Campus coffee"
+    },
+    {
+      "id": 24,
+      "user_id": 4,
+      "name": "Paycheck",
+      "date": "2025-11-03",
+      "amount": 200,
+      "category": "Income",
+      "note": "Barista shift"
+    },
+    {
+      "id": 25,
+      "user_id": 4,
+      "name": "Groceries",
+      "date": "2025-11-04",
+      "amount": -55,
+      "category": "Food",
+      "note": "Weekly groceries"
+    },
+    {
+      "id": 26,
+      "user_id": 4,
+      "name": "Parent Deposit",
+      "date": "2025-10-15",
+      "amount": 100,
+      "category": "Gift",
+      "note": "Help from parents"
+    },
+    {
+      "id": 27,
+      "user_id": 5,
+      "name": "Scholarship Deposit",
+      "date": "2025-09-01",
+      "amount": 300,
+      "category": "Scholarship",
+      "note": "College scholarship"
+    },
+    {
+      "id": 28,
+      "user_id": 5,
+      "name": "Streaming Subscription",
+      "date": "2025-11-10",
+      "amount": -11.99,
+      "category": "Entertainment",
+      "note": "Monthly streaming"
+    },
+    {
+      "id": 29,
+      "user_id": 5,
+      "name": "Campus Meal",
+      "date": "2025-11-11",
+      "amount": -20,
+      "category": "Food",
+      "note": "Dining hall"
+    },
+    {
+      "id": 30,
+      "user_id": 2,
+      "name": "dinner",
+      "date": "2025-11-28",
+      "amount": -20,
+      "category": "Food",
+      "note": "dinner with friends"
+    }
+  ],
   "verificationTokens": [
     {
       "token": "55c46a58d4b6ac01d471e689c2876c6101b211ce77d323a6",
@@ -28,5 +311,16 @@
       "expiresAt": 1763477300326
     }
   ],
-  "passwordResetTokens": []
+  "passwordResetTokens": [],
+  "refreshTokens": [
+    {
+      "token": "27079d0d5067e8e4df3c12790ee8ff3adecd8e02948f2308cad653c22a44f69c",
+      "userId": 2,
+      "expiresAt": 1764979253359
+    }
+  ],
+  "semesters": [],
+  "budgets": [],
+  "bills": [],
+  "notificationPreferences": []
 }

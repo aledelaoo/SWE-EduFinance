@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-
-const API_URL = 'http://localhost:4000';
+import api from '../api/api';
 
 export default function Budget({ setIsAuthenticated }) {
     const navigate = useNavigate();
@@ -28,39 +27,97 @@ export default function Budget({ setIsAuthenticated }) {
 
     useEffect(() => {
         fetchBudgetData();
+
+        // refresh when window/tab regains focus so budget reflects recent transactions
+        const onFocus = () => fetchBudgetData();
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
     }, []);
 
-    async function fetchBudgetData() {
-    try {
-        // TODO: Replace with actual API call when backend is ready
-        const response = await fetch(`${API_URL}/balance`, { 
-        credentials: 'include' 
-        });
+        async function fetchBudgetData() {
+        try {
+                // get balance summary
+                const balRes = await api.get('/balance');
+                const data = balRes.data || {};
+                setUsername(data.userName || 'Student User');
 
-        if (response.ok) {
-        const data = await response.json();
-        setUsername(data.userName || 'Student User');
-        
-        // Update budget data with real data when available
-        setBudgetData(prev => ({
-            ...prev,
-            spent: data.expenses || 0,
-            remaining: prev.monthlyBudget - (data.expenses || 0)
-        }));
+                const expenses = data.expenses || 0;
+
+                // fetch transactions for the month and compute per-category spent
+                const txRes = await api.get('/transactions');
+                const txs = Array.isArray(txRes.data) ? txRes.data : [];
+
+                // determine month/year from currentMonth (e.g. 'November 2025')
+                let baseYear = new Date(budgetData.currentMonth).getFullYear();
+                if (!baseYear || Number.isNaN(baseYear)) baseYear = new Date().getFullYear();
+                const monthName = new Date(budgetData.currentMonth).toLocaleString('en-US', { month: 'long' });
+
+                // helper to match tx category to budget category name
+                const matchCategory = (budgetName, txCategory) => {
+                    if (!txCategory) return false;
+                    const a = budgetName.toLowerCase();
+                    const b = txCategory.toLowerCase();
+                    if (a === b) return true;
+                    if (a.includes(b) || b.includes(a)) return true;
+                    // match by first word
+                    const aFirst = a.split(/\s+/)[0];
+                    const bFirst = b.split(/\s+/)[0];
+                    return aFirst === bFirst;
+                };
+
+                const monthFiltered = txs.filter(t => {
+                    try {
+                        const d = new Date(t.date);
+                        return d.getFullYear() === baseYear && d.toLocaleString('en-US', { month: 'long' }) === monthName;
+                    } catch (e) { return false; }
+                });
+
+                const categoryMap = {};
+                monthFiltered.forEach(t => {
+                    const cat = (t.category || 'Other').toString();
+                    const amt = Number(t.amount) || 0;
+                    // only count expenses (negative amounts)
+                    if (amt < 0) {
+                        // try to find matching budget category
+                        let matched = false;
+                        for (const b of categoryBudgets) {
+                            if (matchCategory(b.name, cat)) {
+                                categoryMap[b.id] = (categoryMap[b.id] || 0) + Math.abs(amt);
+                                matched = true;
+                                break;
+                            }
+                        }
+                        if (!matched) {
+                            // accumulate under 'Other' (id 5 by default)
+                            categoryMap[5] = (categoryMap[5] || 0) + Math.abs(amt);
+                        }
+                    }
+                });
+
+                // build updated category budgets with spent values
+                const updatedCategories = categoryBudgets.map(cat => ({
+                    ...cat,
+                    spent: Number((categoryMap[cat.id] || 0).toFixed(2))
+                }));
+
+                setCategoryBudgets(updatedCategories);
+
+                // Update budget data with real data when available
+                setBudgetData(prev => ({
+                        ...prev,
+                        spent: expenses,
+                        remaining: prev.monthlyBudget - expenses
+                }));
+        } catch (error) {
+                console.error('Error fetching budget data:', error);
+        } finally {
+                setLoading(false);
         }
-    } catch (error) {
-        console.error('Error fetching budget data:', error);
-    } finally {
-        setLoading(false);
-    }
-    } 
+        }
 
     async function handleLogout() {
     try {
-        await fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include'
-        });
+        await api.post('/auth/logout');
     }
     catch (error) {
         console.error('Logout error:', error);

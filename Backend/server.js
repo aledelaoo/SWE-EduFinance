@@ -16,7 +16,7 @@ const FRONTEND_ORIGIN = "http://localhost:5173";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Path to db.json file
+// Path to LowDB file (use the main `db.json` seed file)
 const file = path.resolve(__dirname, "db.json");
 
 // Set up LowDB
