@@ -317,6 +317,11 @@
       "token": "27079d0d5067e8e4df3c12790ee8ff3adecd8e02948f2308cad653c22a44f69c",
       "userId": 2,
       "expiresAt": 1764979253359
+    },
+    {
+      "token": "850187b0ca9146636f9f30840e83ae85b0dcc3c7a643911ce9522f1a92b7bfec",
+      "userId": 1,
+      "expiresAt": 1765146844837
     }
   ],
   "semesters": [],

@@ -72,6 +72,7 @@ export default function Dashboard({ setIsAuthenticated, currentUserID }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar userName={userName} onLogout={handleLogout} />
+      {/* CREDITS: AI-ASSISTED START: Tailwind CSS layout and card styling below was initially drafted with ChatGPT and then customized and integrated by us. */}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
@@ -275,6 +276,7 @@ export default function Dashboard({ setIsAuthenticated, currentUserID }) {
           </div>
         </div>
       </main>
+    {/* CREDITS: AI-ASSISTED END */}
     </div>
   );
 }
