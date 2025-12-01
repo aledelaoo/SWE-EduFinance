@@ -8,6 +8,7 @@ Joao Pedro Lellis        Scrum Master/ Frontend Developer
 Roberto Carrero Salazar  Frontend Developer
 
 Sprint 1
+
 During our sprint we were able to:
 - Establish a working full-stack connection.
 - Verified that the backend routes connect to the database correctly.
@@ -16,6 +17,7 @@ During our sprint we were able to:
 - Prepare documentation and testing evidence for the demo presentation.
 
 Sprint 2
+
 During this sprint we were able to:
 - Add more transaction features, includin adding, editing, and deleting transactions
 - Add user authentication and refresh/login tokens
