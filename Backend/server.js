@@ -59,6 +59,7 @@ function requireUser(req, res, next) {
     }
   }
 
+  // AI assist to help handle legacy cookie-based auth
   // Fallback to uid cookie (legacy/demo behavior)
   const uid = req.cookies?.uid;
   if (!uid) {
@@ -67,6 +68,7 @@ function requireUser(req, res, next) {
   req.userId = Number(uid);
   next();
 }
+/*AI-assitance end */
 
 // Helper to get current month label
 function nowMonthLabel() {
@@ -202,6 +204,7 @@ app.post("/auth/login", async (req, res) => {
       return res.status(403).json({ error: { message: "Email not verified" } });
     }
 
+    // AI assist to help handle tokens
     // Create access and refresh tokens
     const accessToken = jwt.sign({ uid: user.id }, process.env.JWT_ACCESS_SECRET || "dev_access_secret", { expiresIn: process.env.ACCESS_TTL || "15m" });
     const refreshToken = crypto.randomBytes(32).toString("hex");
@@ -224,6 +227,7 @@ app.post("/auth/login", async (req, res) => {
     console.error("Login error:", error);
     return res.status(500).json({ error: { message: "Server error" } });
   }
+  /*AI-assitance end */
 });
 
 // Email verification removed temporarily: users are created verified by default.
@@ -283,6 +287,7 @@ app.post("/auth/reset-password", async (req, res) => {
   }
 });
 
+//AI assist to help handle tokens
 // Refresh access token using refresh token
 app.post("/auth/refresh", async (req, res) => {
   const { refreshToken } = req.body || {};
@@ -313,6 +318,7 @@ app.post("/auth/refresh", async (req, res) => {
     console.error("Refresh token error:", err);
     return res.status(500).json({ error: { message: "Server error" } });
   }
+  /*AI-assitance end */
 });
 
 // Logout
@@ -424,6 +430,7 @@ app.get("/settings/semester", requireUser, (req, res) => {
 // Need to implement BUDGET ROUTES (S1 support).
 // Need to expose per-month budget CRUD so frontend can persist and display semester-distributed budgets.
 // Need to secure and validate payloads and consider pagination if many months exist.
+
 //BUDGET ROUTES
 // GET budgets for a specific month (YYYY-MM) for logged-in user
 app.get('/budgets', requireUser, (req, res) => {
