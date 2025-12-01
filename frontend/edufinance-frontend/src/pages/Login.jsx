@@ -5,12 +5,14 @@ import NavBar from '../components/NavBar';
 const API_URL = 'http://localhost:4000';
 
 export default function Login({ setIsAuthenticated, setCurrentUserID }) {
+  // Source: https://react.dev/learn/reacting-to-input-with-state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Source: https://jasonwatmore.com/post/2020/02/01/react-fetch-http-post-request-examples
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -52,6 +54,8 @@ export default function Login({ setIsAuthenticated, setCurrentUserID }) {
     }
   };
 
+  // Source: https://pagedone.io/blocks/full-pages/login-page
+  // AI assist to add visual polish to the page and improve formatting
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 to-blue-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">

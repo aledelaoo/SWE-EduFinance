@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 
+// Source: https://reactrouter.com/en/main/components/link
+// Source: https://tailwindui.com/components/application-ui/navigation/navbars
+// AI assist to add visual polish and improve formatting
 export default function NavBar({ userName, onLogout }) {
   return (
     <nav className="bg-blue-700 shadow-lg">

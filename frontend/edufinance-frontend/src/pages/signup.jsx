@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 const API_URL = 'http://localhost:4000';
 
 export default function SignUp({ setIsAuthenticated, setCurrentUserID }) {
+  // Source: https://react.dev/learn/reacting-to-input-with-state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,6 +12,7 @@ export default function SignUp({ setIsAuthenticated, setCurrentUserID }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Source: https://jasonwatmore.com/post/2020/02/01/react-fetch-http-post-request-examples
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('[SignUp] submit clicked');
@@ -61,6 +63,8 @@ export default function SignUp({ setIsAuthenticated, setCurrentUserID }) {
     }
   };
 
+  // Source: https://flowbite.com/blocks/marketing/login/
+  // AI assist to add visual polish to the page and improve formatting
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 to-blue-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">

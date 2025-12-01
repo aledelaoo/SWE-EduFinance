@@ -20,6 +20,7 @@ export default function Transactions({ currentUserID }) {
 
   // load transactions from backend when query/category change
   // expose a load function we can call after creating a transaction
+  // source: https://blog.openreplay.com/axios-react-get-post/
   const loadTransactions = async (opts = {}) => {
     setLoading(true);
     setError(null);
@@ -41,6 +42,7 @@ export default function Transactions({ currentUserID }) {
     }
   };
 
+  // Source: https://www.freecodecamp.org/news/debouncing-explained/
   useEffect(() => {
     let cancelled = false;
     // debounce the request slightly to avoid spamming while the user types
@@ -53,12 +55,13 @@ export default function Transactions({ currentUserID }) {
     };
   }, [query, category]);
 
-
+  // Source: https://www.freecodecamp.org/news/how-to-work-with-usememo-in-react/
   const categories = useMemo(() => {
     const set = new Set(allTx.map(t => t.category).filter(Boolean));
     return ['all', ...Array.from(set)];
   }, [allTx]);
 
+  // source: https://shiftasia.com/community/understanding-usememo-in-react-when-and-how-to-use-it/
   const filteredTx = useMemo(() => {
     // server-side search/filter applied, but keep a client-side safety filter
     const q = query.trim().toLowerCase();
@@ -70,6 +73,7 @@ export default function Transactions({ currentUserID }) {
   }, [allTx, query, category]);
 
   // add transaction form state
+  // Source: https://blog.logrocket.com/axios-javascript/
   const [showForm, setShowForm] = useState(false);
   const [formState, setFormState] = useState({ name: '', amount: '', category: '', date: '', note: '' });
   const [posting, setPosting] = useState(false);
@@ -107,6 +111,8 @@ export default function Transactions({ currentUserID }) {
     }
   };
 
+  // Source: https://tailwindcss.com/plus/ui-blocks/application-ui/application-shells/stacked
+  // AI assist to add visual polish to the page and improve formatting
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar userName={userName} onLogout={() => navigate('/login')} />

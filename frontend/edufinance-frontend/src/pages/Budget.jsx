@@ -25,6 +25,7 @@ export default function Budget({ setIsAuthenticated }) {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editedBudgets, setEditedBudgets] = useState([]);
 
+    // Source: https://hygraph.com/blog/react-useeffect-a-complete-guide
     useEffect(() => {
         fetchBudgetData();
 
@@ -125,6 +126,8 @@ export default function Budget({ setIsAuthenticated }) {
     setIsAuthenticated(false);
     navigate('/login');
     }
+
+    // Source: https://devrecipes.net/building-a-simple-inline-edit-form-with-react/
     function handleEditBudget() {
     setIsEditMode(true);
     setEditedBudgets([...categoryBudgets]);
@@ -149,6 +152,8 @@ export default function Budget({ setIsAuthenticated }) {
     setEditedBudgets(prev => prev.map(cat => cat.id == id ? { ...cat, allocated: parseFloat(value) || 0 } : cat )
     );
     } 
+
+    // Source: https://www.geeksforgeeks.org/javascript/expense-tracker-card-using-tailwind-css-javascript/
     function getColorClasses(color) {
         const colors = {
             orange: 'bg-orange-500',
@@ -161,6 +166,9 @@ export default function Budget({ setIsAuthenticated }) {
     }
     const percentSpent = ((budgetData.spent / budgetData.monthlyBudget) * 100).toFixed(0);
     const activeBudgets = isEditMode ? editedBudgets : categoryBudgets;
+
+    // Source: https://tailwindcss.com/plus/ui-blocks/application-ui/application-shells/stacked
+    // AI assist to add visual polish to the page and improve formatting
     return (
     <div className="min-h-screen bg-gray-100">
         <NavBar userName={userName} onLogout={handleLogout} />

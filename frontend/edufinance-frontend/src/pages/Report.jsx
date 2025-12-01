@@ -9,9 +9,8 @@ export default function Report({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
   const [userName, setUserName] = useState('Student User');
-  const [selectedTerm, setSelectedTerm] = useState('Fall'); // Fall | Spring | Summer
+  const [selectedTerm, setSelectedTerm] = useState('Fall'); 
 
-  // Sync with backend for spent/remaining; monthlyBudget is your front-end plan
   const [budgetData, setBudgetData] = useState({
     monthlyBudget: 2000,
     currentMonth: 'November 2025',
@@ -19,7 +18,6 @@ export default function Report({ setIsAuthenticated }) {
     remaining: 2000,
   });
 
-  // Simple category structure (you can later swap this for real per-category data)
   const categories = [
     { name: 'Food and Dining', allocated: 200, spent: 40 },
     { name: 'Textbooks and Supplies', allocated: 200, spent: 0 },
@@ -28,14 +26,14 @@ export default function Report({ setIsAuthenticated }) {
     { name: 'Other', allocated: 100, spent: 10 },
   ];
 
-  // Term → months map (no year logic to keep it simple)
   const TERM_MONTHS = {
     Fall: ['September', 'October', 'November', 'December'],
     Spring: ['January', 'February', 'March', 'April'],
     Summer: ['May', 'June', 'July', 'August'],
   };
 
-  // Pull current expenses and username from backend so report stays in sync
+  // Pull expenses and username from backend
+  // Source: https://devtrium.com/posts/async-functions-useeffect
   useEffect(() => {
     let cancelled = false;
 
@@ -69,6 +67,8 @@ export default function Report({ setIsAuthenticated }) {
     navigate('/login');
   }
 
+  // Source: https://github.com/parallax/jsPDF#usage
+  // Source: https://www.npmjs.com/package/jspdf-autotable
   async function generatePdf() {
     const doc = new jsPDF();
     const months = TERM_MONTHS[selectedTerm];
@@ -88,7 +88,7 @@ export default function Report({ setIsAuthenticated }) {
     const rows = [];
     months.forEach((month, i) => {
       categories.forEach(c => {
-        const spent = i === 0 ? c.spent : 0; // only first month uses current sample spent
+        const spent = i === 0 ? c.spent : 0;
         const remaining = c.allocated - spent;
 
         rows.push([
@@ -147,13 +147,15 @@ export default function Report({ setIsAuthenticated }) {
         styles: { fontSize: 9 }
       });
     } catch (err) {
-      //if transactions can't be loaded, silently continue (still log for debugging)
+      //if transactions can't be loaded, continue silently
       console.warn('Failed to fetch transactions for report:', err);
     }
 
     doc.save(`budget_${selectedTerm}.pdf`);
   }
 
+  // Source: https://flowbite.com/docs/components/card/
+  // AI assist to add visual polish to the page and improve formatting
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar userName={userName} onLogout={handleLogout} />
@@ -164,7 +166,7 @@ export default function Report({ setIsAuthenticated }) {
           Choose a term and download a 4 month budget plan as a PDF.
         </p>
 
-        {/* 2x2 summary block with colored values */}
+        {/* 2x2 summary block */}
         <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm">
             <div>

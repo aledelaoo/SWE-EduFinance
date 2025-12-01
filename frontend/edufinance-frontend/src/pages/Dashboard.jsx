@@ -11,10 +11,12 @@ export default function Dashboard({ setIsAuthenticated, currentUserID }) {
   const [transactions, setTransactions] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
 
+  // Source: https://devtrium.com/posts/async-functions-useeffect
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Source: https://javascript.plainenglish.io/promise-all-from-multiple-fetches-with-async-await-d7266ff98ee7
   async function fetchData() {
     try {
       const [balanceRes, txRes] = await Promise.all([
@@ -69,6 +71,8 @@ export default function Dashboard({ setIsAuthenticated, currentUserID }) {
   const monthlyBudget = 2000;
   const percentageSpent = ((expenses / monthlyBudget) * 100).toFixed(0);
 
+  // Source: https://tailwindcss.com/plus/ui-blocks/application-ui/application-shells/stacked
+  // AI assist to add visual polish to the page and improve formatting
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar userName={userName} onLogout={handleLogout} />

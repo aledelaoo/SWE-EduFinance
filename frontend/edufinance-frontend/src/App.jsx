@@ -7,6 +7,8 @@ import Budget from './pages/Budget';
 import SignUp from './pages/SignUp.jsx'
 import Report from './pages/Report.jsx';
 
+// Source: https://reactrouter.com/en/main/start/tutorial
+// AI assist to add visual polish and improve formatting
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUserID, setCurrentUserID] = useState(null)
