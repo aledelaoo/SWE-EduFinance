@@ -15,13 +15,23 @@ During our sprint we were able to:
 - Develop a solid base for our UI.
 - Prepare documentation and testing evidence for the demo presentation.
 
+Sprint 2
+During this sprint we were able to:
+- Add more transaction features, includin adding, editing, and deleting transactions
+- Add user authentication and refresh/login tokens
+- Create a responsive dashboard
+- Build a budget management screen
+- Implement alerts
+- Allow for semester date shifts
+- Allow for budget changes
+- Allow for profile updates
 
 To run the website locally:
-1. Downlaod the repository to your computer
-2. In the ternmail, "cd Backend" (run "npm install" if necessary)
-3. then run "npm run dev"
+1. Download the repository to your computer
+2. In the terminal, "cd Backend" (run "npm install" if necessary)
+3. Then run "npm run dev"
 4. In a seperate terminal, "cd frontend"
 5. Then "cd edufinance-frontend"
-6. After you navigate to the correct foder, again run "npm run dev"
+6. After you've navigated to the correct foder, again run "npm run dev"
 7. Click on the link the terminal produces
 8. You've made it to the website!
