@@ -11,7 +11,7 @@ export default function Transactions({ currentUserID }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // keep a simple user/title fallback — backend may return only the current user's txs
+  // keep a simple user/title fallback
   const userName = 'User';
   const month = 'This Month';
   // filters
